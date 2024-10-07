@@ -1,0 +1,27 @@
+services:
+  webserver_2:
+    image: webserver_2_image_bis_bis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nginx-webserver-2-bis-bis
+    restart: unless-stopped
+    ports: 
+      - "6162:80"
+    environment:
+      - PHP_FPM_CONTAINER=webserver_2_image_bis_bis
+    # command: /bin/sh -c "envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -s reload"
+    # volumes:
+      # - .:/var/www
+    #   - ./docker-compose/nginx/defaulf.conf:/etc/nginx/conf.d/
+      # - ./docker-compose/nginx/:/etc/nginx/conf.d
+      # - ./docker-compose/nginx/default.conf.template:/etc/nginx/templates/default.conf.template
+    networks:
+      - app-network
+
+  # redis
+  # supervisor
+
+networks:
+  app-network:
+    driver: bridge

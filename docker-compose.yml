@@ -1,0 +1,117 @@
+version: '3.8'
+services:
+  # laravel_app_test_2_bis_new:
+  #   build:
+  #     args:
+  #       user: laravel_app_test_user_2
+  #       uid: 1000
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: laravel_app_test_image_2
+  #   # container_name: laravel_app_test_2_bis
+  #   restart: unless-stopped
+  #   working_dir: /var/www
+  #   depends_on:
+  #     - db_test_2
+  #   # tty: true
+  #   # environment:
+  #   #   SERVICE_NAME: app
+  #   #   SERVICE_TAGS: dev
+  #   volumes:
+  #     - ./:/var/www
+  #     - ./storage:/var/www/storage
+  #     - public:/var/www/public
+  #     # - ./docker-compose/php/local.ini:/etc/nginx/conf.d
+  #   networks:
+  #     - app-network
+
+  laravel_app_test_2_bis_new:
+    image: ghcr.io/mimachh/php-laravel-11:latest
+    environment:
+      - user=laravel_app_test_user_2
+      - uid=1000
+    # container_name: laravel_app_test_2_bis
+    restart: unless-stopped
+    # working_dir: /var/www
+    depends_on:
+      - db_test_2
+    # tty: true
+    # environment:
+    #   SERVICE_NAME: app
+    #   SERVICE_TAGS: dev
+    volumes:
+      - ./:/var/www
+      - ./storage:/var/www/storage
+      - public:/var/www/public
+      # - ./docker-compose/php/local.ini:/etc/nginx/conf.d
+    networks:
+      - app-network
+
+
+  # webserver_2:
+  #   image: webserver_2_image_bis
+  #   build:
+  #     context: ./docker-compose/nginx
+  #     dockerfile: Dockerfile
+  #   container_name: nginx-webserver-2-bis
+  #   restart: unless-stopped
+  #   ports: 
+  #     - "6162:80"
+  #   environment:
+  #     - PHP_FPM_CONTAINER=laravel_app_test_2_bis
+  #   # command: /bin/sh -c "envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -s reload"
+  #   volumes:
+  #     - .:/var/www
+  #   #   - ./docker-compose/nginx/defaulf.conf:/etc/nginx/conf.d/
+  #     # - ./docker-compose/nginx/:/etc/nginx/conf.d
+  #     # - ./docker-compose/nginx/default.conf.template:/etc/nginx/templates/default.conf.template
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - laravel_app_test_2_bis
+
+  webserver_2:
+    image: ghcr.io/mimachh/nginx-laravel-11:latest
+    container_name: nginx-webserver-2-bis-mimach
+    restart: unless-stopped
+    ports: 
+      - "6162:80"
+    environment:
+      - PHP_FPM_CONTAINER=laravel_app_test_2_bis_new
+    volumes:
+      - .:/var/www
+    networks:
+      - app-network
+    depends_on:
+      - laravel_app_test_2_bis_new
+
+
+  db_test_2:
+    image: postgres:16.2
+    container_name: db_test_2
+    environment:
+      POSTGRES_DB: laravel
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secret
+      PGDATA: /data/postgres
+      TZ: Europe/Paris
+    volumes:
+      - db_test_2:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+          # - r-p
+      - app-network
+    restart: unless-stopped
+  
+  # redis
+  # supervisor
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  public:
+  db_test_2:
+    driver: local
