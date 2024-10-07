@@ -26,7 +26,10 @@ services:
   #     - app-network
 
   laravel_app_test_2_bis_new:
-    image: ghcr.io/mimachh/php-laravel-11:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: ghcr.io/mimachh/php-laravel-11:latest
     environment:
       - user=laravel_app_test_user_2
       - uid=1000
@@ -46,6 +49,8 @@ services:
       # - ./docker-compose/php/local.ini:/etc/nginx/conf.d
     networks:
       - app-network
+    # expose:
+    #   - 9000
 
 
   # webserver_2:
@@ -76,12 +81,27 @@ services:
     restart: unless-stopped
     ports: 
       - "6162:80"
+      - "443:443"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=r-p"
+      - "traefik.http.routers.laratest3.rule=Host(`voyons.trouvetatable.fr`)"
+      - "traefik.http.routers.laratest3.entrypoints=websecure,web"
+      - "traefik.http.routers.laratest3.tls=true"
+      - "traefik.http.routers.laratest3.tls.certresolver=myresolver"
+      - "traefik.http.services.laratest3.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.autodetect.contenttype=true"
+      #- "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      #- "traefik.http.routers.httplaratest3.entrypoints=web"
+      - "traefik.http.routers.httplaratest3.rule=Host(`voyons.trouvetatable.fr`)"
+
     environment:
       - PHP_FPM_CONTAINER=laravel_app_test_2_bis_new
     volumes:
       - .:/var/www
     networks:
       - app-network
+      - r-p
     depends_on:
       - laravel_app_test_2_bis_new
 
@@ -110,7 +130,8 @@ services:
 networks:
   app-network:
     driver: bridge
-
+  r-p:
+    external: true
 volumes:
   public:
   db_test_2:

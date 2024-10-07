@@ -1,57 +1,28 @@
-# Use the official PHP image as a base image
-FROM php:8.3-fpm-alpine
+FROM ghcr.io/mimachh/php-laravel-11:latest
 
-ARG user
-ARG uid
+WORKDIR /var/www
 
-# Install system dependencies
-RUN apk add --no-cache \
-    curl \
-    libxml2-dev \
-    php-soap \
-    libzip-dev \
-    unzip \
-    zip \
-    libpng \
-    libpng-dev \
-    jpeg-dev \
-    oniguruma-dev \
-    curl-dev \
-    freetype-dev \
-    libpq-dev \
-    git \
-    nodejs \
-    npm
+# Installer les dépendances Composer
+COPY composer.json /var/www/
 
+RUN ls -l /var/www && cat /var/www/composer.json && cat /var/www/composer.lock
 
-# RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# Install PHP extensions
-RUN docker-php-ext-install pgsql pdo pdo_mysql pdo_pgsql bcmath mbstring zip exif pcntl
+# Installer les dépendances NPM
+COPY package.json package-lock.json /var/www/
+RUN npm install && npm run build
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-
-
-RUN adduser -D -u $uid -g www-data $user
-
+# Copier le reste du code source
 COPY . /var/www
 
-# Installer les dépendances NPM et compiler les assets
-RUN npm install
-RUN npm run build
+# Assurer les bonnes permissions
+RUN chown -R www-data:www-data /var/www
 
-COPY --chown=$user:www-data . /var/www
+COPY entrypoint.sh /
 
-USER $user
+# Make the entrypoint script executable
+RUN chmod +x /entrypoint.sh
 
-EXPOSE 9000
-
-# CMD ["php-fpm"]
-
-
-
-
-
-ENTRYPOINT ["sh", "./docker-compose/entrypoint.sh"]
+# Specify the entrypoint
+ENTRYPOINT ["sh", "/entrypoint.sh"]
