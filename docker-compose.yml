@@ -29,7 +29,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # image: ghcr.io/mimachh/php-laravel-11:latest
     environment:
       - user=laravel_app_test_user_2
       - uid=1000
@@ -43,9 +42,10 @@ services:
     #   SERVICE_NAME: app
     #   SERVICE_TAGS: dev
     volumes:
+      - shared-volume:/var/www
       #- ./:/var/www
       - ./storage:/var/www/storage
-      - public:/var/www/public
+      #- public:/var/www/public
       # - ./docker-compose/php/local.ini:/etc/nginx/conf.d
     networks:
       - app-network
@@ -98,7 +98,8 @@ services:
     environment:
       - PHP_FPM_CONTAINER=laravel_app_test_2_bis_new
     volumes:
-      - .:/var/www
+      # - .:/var/www
+      - shared-volume:/var/www
     networks:
       - app-network
       - r-p
@@ -133,6 +134,7 @@ networks:
   r-p:
     external: true
 volumes:
-  public:
+  # public:
+  shared-volume:
   db_test_2:
     driver: local
