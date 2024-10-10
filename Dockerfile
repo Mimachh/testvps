@@ -4,6 +4,8 @@ WORKDIR /var/www
 
 COPY . /var/www
 
+USER root
+
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 COPY package.json package-lock.json /var/www/
@@ -25,6 +27,8 @@ COPY entrypoint.sh /
 
 # Make the entrypoint script executable
 RUN chmod +x /entrypoint.sh
+
+USER $user
 
 # Specify the entrypoint
 ENTRYPOINT ["sh", "/entrypoint.sh"]
