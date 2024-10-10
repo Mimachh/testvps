@@ -16,7 +16,7 @@ RUN mkdir -p /var/www/public/build && \
 RUN npm run build
 
 # Copier le reste du code source
-# COPY . /var/www
+COPY . /var/www
 
 # Assurer les bonnes permissions
 RUN chown -R www-data:www-data /var/www
